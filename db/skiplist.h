@@ -139,6 +139,9 @@ class SkipList {
   Random rnd_;
 };
 
+//TODO: How to understand cpp atomic memory_order?
+// The Cpp Concurrency model?
+
 // Implementation details follow
 template <typename Key, class Comparator>
 struct SkipList<Key, Comparator>::Node {

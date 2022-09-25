@@ -5,4 +5,6 @@
 
 # Build directory.
 build/
+build_debug/
 out/
+.idea/
