@@ -24,6 +24,7 @@
 
 namespace leveldb {
 
+// slice of a char/byte array.
 class LEVELDB_EXPORT Slice {
  public:
   // Create an empty slice.

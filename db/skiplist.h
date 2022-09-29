@@ -328,6 +328,7 @@ SkipList<Key, Comparator>::SkipList(Comparator cmp, Arena* arena)
       arena_(arena),
       head_(NewNode(0 /* any key will do */, kMaxHeight)),
       max_height_(1),
+      // random seed magic number.
       rnd_(0xdeadbeef) {
   for (int i = 0; i < kMaxHeight; i++) {
     head_->SetNext(i, nullptr);

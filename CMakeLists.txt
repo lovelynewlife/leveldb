@@ -286,6 +286,10 @@ add_executable(leveldbutil
 )
 target_link_libraries(leveldbutil leveldb)
 
+add_executable(playground
+        "db/playground.cpp")
+target_link_libraries(playground leveldb)
+
 if(LEVELDB_BUILD_TESTS)
   enable_testing()
 
