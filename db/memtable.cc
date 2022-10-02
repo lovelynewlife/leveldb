@@ -106,9 +106,9 @@ bool MemTable::Get(const LookupKey& key, std::string* value, Status* s) {
   iter.Seek(memkey.data());
   if (iter.Valid()) {
     // entry format is:
-    //    klength  varint32
-    //    userkey  char[klength]
-    //    tag      uint64
+    //    internal klength = klength + 8(tag length)  varint32
+    //    userkey  char[internal klength-8]
+    //    tag      uint64 8 bytes
     //    vlength  varint32
     //    value    char[vlength]
     // Check that it belongs to same user key.  We do not check the
