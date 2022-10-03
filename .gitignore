@@ -8,3 +8,6 @@ build/
 build_debug/
 out/
 .idea/
+
+# leveldb files
+db/dumping

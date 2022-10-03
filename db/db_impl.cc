@@ -659,6 +659,8 @@ void DBImpl::RecordBackgroundError(const Status& s) {
   }
 }
 
+// Note: Maybe.
+// Means: compaction is triggered by an event, not check periodically.
 void DBImpl::MaybeScheduleCompaction() {
   mutex_.AssertHeld();
   if (background_compaction_scheduled_) {
@@ -889,6 +891,7 @@ Status DBImpl::InstallCompactionResults(CompactionState* compact) {
   return versions_->LogAndApply(compact->compaction->edit(), &mutex_);
 }
 
+// Do Compaction work in another thread.
 Status DBImpl::DoCompactionWork(CompactionState* compact) {
   const uint64_t start_micros = env_->NowMicros();
   int64_t imm_micros = 0;  // Micros spent doing imm_ compactions
@@ -1347,6 +1350,7 @@ Status DBImpl::MakeRoomForWrite(bool force) {
       mutex_.Unlock();
       env_->SleepForMicroseconds(1000);
       allow_delay = false;  // Do not delay a single write more than once
+      // same lock as the lock in bgworkfinished cond var.
       mutex_.Lock();
     } else if (!force &&
                (mem_->ApproximateMemoryUsage() <= options_.write_buffer_size)) {
