@@ -45,7 +45,7 @@ class WritableFile;
 int FindFile(const InternalKeyComparator& icmp,
              const std::vector<FileMetaData*>& files, const Slice& key);
 
-// Returns true iff some file in "files" overlaps the user key range
+// Returns true if some file in "files" overlaps the user key range
 // [*smallest,*largest].
 // smallest==nullptr represents a key smaller than all keys in the DB.
 // largest==nullptr represents a key largest than all keys in the DB.

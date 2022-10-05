@@ -222,6 +222,13 @@ void DBImpl::MaybeIgnoreError(Status* s) const {
   }
 }
 
+/*
+called at the end of every compaction and at the end of recovery.
+It finds the names of all files in the database.
+It deletes all log files that are not the current log file.
+It deletes all table files that
+are not referenced from some level and are not the output of an active compaction.
+*/
 void DBImpl::RemoveObsoleteFiles() {
   mutex_.AssertHeld();
 
@@ -1147,6 +1154,7 @@ Status DBImpl::Get(const ReadOptions& options, const Slice& key,
     } else if (imm != nullptr && imm->Get(lkey, value, &s)) {
       // Done
     } else {
+      // TODO: look up in sstables.
       s = current->Get(options, lkey, value, &stats);
       have_stat_update = true;
     }
@@ -1207,8 +1215,10 @@ Status DBImpl::Write(const WriteOptions& options, WriteBatch* updates) {
   w.done = false;
 
   // DB mutex_ RAII, release this when return.
+  // writers are orgnized as WriteBatch.
   MutexLock l(&mutex_);
   writers_.push_back(&w);
+  // wait if w is not done in a batch or not it's turn to write.
   while (!w.done && &w != writers_.front()) {
     w.cv.Wait();
   }
@@ -1230,6 +1240,7 @@ Status DBImpl::Write(const WriteOptions& options, WriteBatch* updates) {
     // during this phase since &w is currently responsible for logging
     // and protects against concurrent loggers and concurrent writes
     // into mem_.
+    // skip list memTable will garantee the read atomicity using std::atomicitity.
     {
       mutex_.Unlock();
       // Write WAL Log, need to do file sync.

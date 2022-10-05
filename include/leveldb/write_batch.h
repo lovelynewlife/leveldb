@@ -30,6 +30,8 @@ namespace leveldb {
 
 class Slice;
 
+// WriteBatch: guarantee writing order.
+// may gather a group of small writes.
 class LEVELDB_EXPORT WriteBatch {
  public:
   class LEVELDB_EXPORT Handler {
