@@ -1145,6 +1145,7 @@ Status DBImpl::Get(const ReadOptions& options, const Slice& key,
   Version::GetStats stats;
 
   // Unlock while reading from files and memtables
+  // components may be guarded by their own locks.
   {
     mutex_.Unlock();
     // First look in the memtable, then in the immutable memtable (if any).
@@ -1154,7 +1155,7 @@ Status DBImpl::Get(const ReadOptions& options, const Slice& key,
     } else if (imm != nullptr && imm->Get(lkey, value, &s)) {
       // Done
     } else {
-      // TODO: look up in sstables.
+      // look up in sstables.
       s = current->Get(options, lkey, value, &stats);
       have_stat_update = true;
     }

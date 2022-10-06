@@ -76,6 +76,7 @@ class HandleTable {
     return *FindPointer(key, hash);
   }
 
+  // return old.
   LRUHandle* Insert(LRUHandle* h) {
     LRUHandle** ptr = FindPointer(h->key(), h->hash);
     LRUHandle* old = *ptr;

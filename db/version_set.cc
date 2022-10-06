@@ -326,6 +326,7 @@ Status Version::Get(const ReadOptions& options, const LookupKey& k,
   stats->seek_file = nullptr;
   stats->seek_file_level = -1;
 
+  // iterate function state.
   struct State {
     Saver saver;
     GetStats* stats;
@@ -338,6 +339,7 @@ Status Version::Get(const ReadOptions& options, const LookupKey& k,
     Status s;
     bool found;
 
+    // do Key Match, if return false, stop.
     static bool Match(void* arg, int level, FileMetaData* f) {
       State* state = reinterpret_cast<State*>(arg);
 
@@ -351,6 +353,7 @@ Status Version::Get(const ReadOptions& options, const LookupKey& k,
       state->last_file_read = f;
       state->last_file_read_level = level;
 
+      // key finding in table cache, and update table cache.
       state->s = state->vset->table_cache_->Get(*state->options, f->number,
                                                 f->file_size, state->ikey,
                                                 &state->saver, SaveValue);
