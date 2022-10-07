@@ -9,7 +9,7 @@ int main() {
   leveldb::DB* db;
   leveldb::Options options;
   options.create_if_missing = true;
-  leveldb::Status status = leveldb::DB::Open(options, "./dumping", &db);
+  leveldb::Status status = leveldb::DB::Open(options, "./dumping2", &db);
   assert(status.ok());
   for(int i = 0; i < 10000000; i ++) {
     db->Put(leveldb::WriteOptions(), std::to_string(i), std::to_string(i));

@@ -777,6 +777,7 @@ void VersionSet::AppendVersion(Version* v) {
   v->next_->prev_ = v;
 }
 
+// log in manifest file and apply version change.
 Status VersionSet::LogAndApply(VersionEdit* edit, port::Mutex* mu) {
   if (edit->has_log_number_) {
     assert(edit->log_number_ >= log_number_);
@@ -792,6 +793,7 @@ Status VersionSet::LogAndApply(VersionEdit* edit, port::Mutex* mu) {
   edit->SetNextFile(next_file_number_);
   edit->SetLastSequence(last_sequence_);
 
+  // based on the newest version and version edit, build a new version.s
   Version* v = new Version(this);
   {
     Builder builder(this, current_);
@@ -821,11 +823,13 @@ Status VersionSet::LogAndApply(VersionEdit* edit, port::Mutex* mu) {
     mu->Unlock();
 
     // Write new record to MANIFEST log
+    // log the version edit.
     if (s.ok()) {
       std::string record;
       edit->EncodeTo(&record);
       s = descriptor_log_->AddRecord(record);
       if (s.ok()) {
+        // need to do file sync.
         s = descriptor_file_->Sync();
       }
       if (!s.ok()) {
@@ -843,6 +847,7 @@ Status VersionSet::LogAndApply(VersionEdit* edit, port::Mutex* mu) {
   }
 
   // Install the new version
+  // apply edit change to the version set.
   if (s.ok()) {
     AppendVersion(v);
     log_number_ = edit->log_number_;
@@ -1252,6 +1257,7 @@ Iterator* VersionSet::MakeInputIterator(Compaction* c) {
   return result;
 }
 
+// pick up compaction input files.
 Compaction* VersionSet::PickCompaction() {
   Compaction* c;
   int level;

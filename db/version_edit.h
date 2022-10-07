@@ -26,6 +26,7 @@ struct FileMetaData {
   InternalKey largest;   // Largest internal key served by table
 };
 
+// version edit log will write into manifest file.
 class VersionEdit {
  public:
   VersionEdit() { Clear(); }

@@ -40,6 +40,7 @@ std::string SSTTableFileName(const std::string& dbname, uint64_t number) {
   return MakeFileName(dbname, number, "sst");
 }
 
+// manifest file.
 std::string DescriptorFileName(const std::string& dbname, uint64_t number) {
   assert(number > 0);
   char buf[100];

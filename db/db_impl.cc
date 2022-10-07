@@ -522,7 +522,9 @@ Status DBImpl::WriteLevel0Table(MemTable* mem, VersionEdit* edit,
 
   Status s;
   {
+    // Release mutex while we're actually doing the compaction work
     mutex_.Unlock();
+    // build sstable, record version edit info and table file meta.
     s = BuildTable(dbname_, env_, options_, table_cache_, iter, &meta);
     mutex_.Lock();
   }
@@ -540,6 +542,7 @@ Status DBImpl::WriteLevel0Table(MemTable* mem, VersionEdit* edit,
     const Slice min_user_key = meta.smallest.user_key();
     const Slice max_user_key = meta.largest.user_key();
     if (base != nullptr) {
+      // if key range is not overlapped with other files in that level, update level
       level = base->PickLevelForMemTableOutput(min_user_key, max_user_key);
     }
     edit->AddFile(level, meta.number, meta.file_size, meta.smallest,
@@ -670,6 +673,7 @@ void DBImpl::RecordBackgroundError(const Status& s) {
 // Means: compaction is triggered by an event, not check periodically.
 void DBImpl::MaybeScheduleCompaction() {
   mutex_.AssertHeld();
+  // means that only one compaction task is running at a given time.
   if (background_compaction_scheduled_) {
     // Already scheduled
   } else if (shutting_down_.load(std::memory_order_acquire)) {
@@ -732,6 +736,7 @@ void DBImpl::BackgroundCompaction() {
         (m->end ? m->end->DebugString().c_str() : "(end)"),
         (m->done ? "(end)" : manual_end.DebugString().c_str()));
   } else {
+    // return an optional(compaction object)
     c = versions_->PickCompaction();
   }
 
@@ -1150,12 +1155,13 @@ Status DBImpl::Get(const ReadOptions& options, const Slice& key,
     mutex_.Unlock();
     // First look in the memtable, then in the immutable memtable (if any).
     LookupKey lkey(key, snapshot);
+    // first search in memory, will not trigger compaction.
     if (mem->Get(lkey, value, &s)) {
       // Done
     } else if (imm != nullptr && imm->Get(lkey, value, &s)) {
       // Done
     } else {
-      // look up in sstables.
+      // look up in sstables, may trigger compaction.
       s = current->Get(options, lkey, value, &stats);
       have_stat_update = true;
     }
@@ -1341,6 +1347,7 @@ WriteBatch* DBImpl::BuildBatchGroup(Writer** last_writer) {
 
 // REQUIRES: mutex_ is held
 // REQUIRES: this thread is currently at the front of the writer queue
+// Room: memory room, if mem can accecpt new write.
 Status DBImpl::MakeRoomForWrite(bool force) {
   mutex_.AssertHeld();
   assert(!writers_.empty());
