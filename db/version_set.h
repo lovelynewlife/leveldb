@@ -160,6 +160,7 @@ class Version {
   // Level that should be compacted next and its compaction score.
   // Score < 1 means compaction is not strictly needed.  These fields
   // are initialized by Finalize().
+  // pre-compute in Finalize().
   double compaction_score_;
   int compaction_level_;
 };

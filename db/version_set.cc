@@ -64,6 +64,8 @@ static int64_t TotalFileSize(const std::vector<FileMetaData*>& files) {
   return sum;
 }
 
+// call when ref number<=0, version has the ref of which version set
+// it belongs to, so do delete from vset here.
 Version::~Version() {
   assert(refs_ == 0);
 
@@ -207,6 +209,7 @@ class Version::LevelFileNumIterator : public Iterator {
   mutable char value_buf_[16];
 };
 
+// get the iterator of sstable file.
 static Iterator* GetFileIterator(void* arg, const ReadOptions& options,
                                  const Slice& file_value) {
   TableCache* cache = reinterpret_cast<TableCache*>(arg);
