@@ -39,6 +39,7 @@ void VersionEdit::Clear() {
   new_files_.clear();
 }
 
+// Encode to a piece of log record.
 void VersionEdit::EncodeTo(std::string* dst) const {
   if (has_comparator_) {
     PutVarint32(dst, kComparator);

@@ -94,6 +94,7 @@ void BlockBuilder::Add(const Slice& key, const Slice& value) {
   PutVarint32(&buffer_, value.size());
 
   // Add string delta to buffer_ followed by value
+  // key.data() return char*
   buffer_.append(key.data() + shared, non_shared);
   buffer_.append(value.data(), value.size());
 

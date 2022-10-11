@@ -47,7 +47,7 @@ struct TableBuilder::Rep {
   bool closed;  // Either Finish() or Abandon() has been called.
   FilterBlockBuilder* filter_block;
 
-  // We do not emit the index entry for a block until we have seen the
+  // We do not emit *the index entry for a block* until we have seen the
   // first key for the next data block.  This allows us to use shorter
   // keys in the index block.  For example, consider a block boundary
   // between the keys "the quick brown fox" and "the who".  We can use
@@ -128,6 +128,7 @@ void TableBuilder::Flush() {
   if (!ok()) return;
   if (r->data_block.empty()) return;
   assert(!r->pending_index_entry);
+  // write data block.
   WriteBlock(&r->data_block, &r->pending_handle);
   if (ok()) {
     r->pending_index_entry = true;
@@ -171,6 +172,7 @@ void TableBuilder::WriteBlock(BlockBuilder* block, BlockHandle* handle) {
   }
   WriteRawBlock(block_contents, type, handle);
   r->compressed_output.clear();
+  // block builder is a reused-object.
   block->Reset();
 }
 
@@ -197,6 +199,7 @@ Status TableBuilder::status() const { return rep_->status; }
 
 Status TableBuilder::Finish() {
   Rep* r = rep_;
+  // flush remained data block.
   Flush();
   assert(!r->closed);
   r->closed = true;
@@ -227,6 +230,7 @@ Status TableBuilder::Finish() {
 
   // Write index block
   if (ok()) {
+    // the last index entry.
     if (r->pending_index_entry) {
       r->options.comparator->FindShortSuccessor(&r->last_key);
       std::string handle_encoding;

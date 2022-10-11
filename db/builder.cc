@@ -14,6 +14,7 @@
 
 namespace leveldb {
 
+// only called when writing memTable to ssTable.
 Status BuildTable(const std::string& dbname, Env* env, const Options& options,
                   TableCache* table_cache, Iterator* iter, FileMetaData* meta) {
   Status s;
@@ -48,6 +49,7 @@ Status BuildTable(const std::string& dbname, Env* env, const Options& options,
     delete builder;
 
     // Finish and check for file errors
+    // need to do file sync.
     if (s.ok()) {
       s = file->Sync();
     }
