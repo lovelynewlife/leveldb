@@ -796,7 +796,7 @@ Status VersionSet::LogAndApply(VersionEdit* edit, port::Mutex* mu) {
   edit->SetNextFile(next_file_number_);
   edit->SetLastSequence(last_sequence_);
 
-  // based on the newest version and version edit, build a new version.s
+  // based on the newest version and version edit, build a new version.
   Version* v = new Version(this);
   {
     Builder builder(this, current_);
@@ -917,6 +917,8 @@ Status VersionSet::Recover(bool* save_manifest) {
                        0 /*initial_offset*/);
     Slice record;
     std::string scratch;
+    // read all the records in manifest file, batch record the version edit.
+    // scrath is the true store of record slice, used to release memory automatically.
     while (reader.ReadRecord(&record, &scratch) && s.ok()) {
       ++read_records;
       VersionEdit edit;

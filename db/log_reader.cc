@@ -192,6 +192,8 @@ unsigned int Reader::ReadPhysicalRecord(Slice* result) {
       if (!eof_) {
         // Last read was a full read, so this is a trailer to skip
         buffer_.clear();
+        // backing_store is the real buffer that get read form os, its memory is released
+        // when reader object is desconstruct.
         Status status = file_->Read(kBlockSize, &buffer_, backing_store_);
         end_of_buffer_offset_ += buffer_.size();
         if (!status.ok()) {
@@ -213,7 +215,7 @@ unsigned int Reader::ReadPhysicalRecord(Slice* result) {
       }
     }
 
-    // Parse the header
+    // Parse the log record header
     const char* header = buffer_.data();
     const uint32_t a = static_cast<uint32_t>(header[4]) & 0xff;
     const uint32_t b = static_cast<uint32_t>(header[5]) & 0xff;
@@ -256,6 +258,7 @@ unsigned int Reader::ReadPhysicalRecord(Slice* result) {
       }
     }
 
+    // slice op: buffer_[kHeaderSize + length:]
     buffer_.remove_prefix(kHeaderSize + length);
 
     // Skip physical record that started before initial_offset_
